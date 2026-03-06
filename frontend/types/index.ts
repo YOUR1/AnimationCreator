@@ -112,6 +112,7 @@ export interface AnimationCreateRequest {
   negative_prompt?: string;
   cfg_scale?: number;
   special_fx?: SpecialFx;
+  seamless_loop?: boolean;
 }
 
 // Generation types

@@ -89,17 +89,21 @@ def process_video_task(
     video_url: str,
     user_id: int,
     character_id: int,
+    seamless_loop: bool = False,
 ) -> dict:
     """
-    Process video with ping-pong effect.
+    Process video with optional ping-pong effect.
 
-    This creates a seamless loop by playing the video forward then backward.
+    When seamless_loop is enabled, creates a seamless loop by playing the
+    video forward then backward. This is useful for smooth transitions
+    between multiple animation states.
 
     Args:
         animation_id: Animation database record ID.
         video_url: URL of the original video.
         user_id: User ID for storage path.
         character_id: Character ID for storage path.
+        seamless_loop: Whether to apply ping-pong effect for seamless looping.
 
     Returns:
         Dictionary with processed video URL.
@@ -113,6 +117,7 @@ def process_video_task(
             video_url=video_url,
             user_id=user_id,
             character_id=character_id,
+            seamless_loop=seamless_loop,
         )
     )
 
@@ -122,10 +127,11 @@ async def _process_video_async(
     video_url: str,
     user_id: int,
     character_id: int,
+    seamless_loop: bool = False,
 ) -> dict:
     """Async implementation of video processing."""
     try:
-        logger.info(f"Processing video for animation {animation_id}")
+        logger.info(f"Processing video for animation {animation_id}, seamless_loop={seamless_loop}")
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -135,29 +141,36 @@ async def _process_video_async(
             # Download or copy original video
             get_video_from_url(video_url, input_path)
 
-            # Apply ping-pong effect
-            VideoProcessor.make_ping_pong(input_path, output_path)
+            # Apply ping-pong effect only if seamless_loop is enabled
+            if seamless_loop:
+                VideoProcessor.make_ping_pong(input_path, output_path)
+                final_video_path = output_path
+                filename_suffix = "_seamless.mp4"
+            else:
+                # No processing needed, use original
+                final_video_path = input_path
+                filename_suffix = ".mp4"
 
-            # Upload processed video
-            with open(output_path, "rb") as f:
-                processed_bytes = f.read()
+            # Upload video (processed or original)
+            with open(final_video_path, "rb") as f:
+                video_bytes = f.read()
 
             storage = get_storage_service()
-            processed_url = await storage.upload_file(
-                file_bytes=processed_bytes,
-                filename=f"animation_{animation_id}_pingpong.mp4",
+            final_url = await storage.upload_file(
+                file_bytes=video_bytes,
+                filename=f"animation_{animation_id}{filename_suffix}",
                 content_type="video/mp4",
                 prefix=f"animations/{user_id}/{character_id}",
             )
 
-            # Update animation record with processed video URL
-            await _update_animation_video_url(animation_id, processed_url)
+            # Update animation record with video URL
+            await _update_animation_video_url(animation_id, final_url)
 
-            # Queue GIF conversion with the processed video
+            # Queue GIF conversion with the video
             from app.workers.gif_worker import convert_to_gif_task
             convert_to_gif_task.delay(
                 animation_id=animation_id,
-                video_url=processed_url,
+                video_url=final_url,
                 user_id=user_id,
                 character_id=character_id,
             )
@@ -165,7 +178,7 @@ async def _process_video_async(
             logger.info(f"Video processing complete for animation {animation_id}")
             return {
                 "animation_id": animation_id,
-                "video_url": processed_url,
+                "video_url": final_url,
             }
 
     except Exception as e:

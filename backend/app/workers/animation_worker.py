@@ -123,6 +123,7 @@ def generate_animation_task(
     negative_prompt: str | None = None,
     cfg_scale: float | None = None,
     special_fx: str | None = None,
+    seamless_loop: bool = False,
 ) -> dict:
     """
     Generate animations for a character.
@@ -141,6 +142,7 @@ def generate_animation_task(
         negative_prompt: Elements to avoid in generation.
         cfg_scale: Classifier Free Guidance scale.
         special_fx: Special effects (hug, kiss, heart_gesture, squish, expansion).
+        seamless_loop: Whether to create a seamless loop using ping-pong effect.
 
     Returns:
         Dictionary with animation results.
@@ -163,6 +165,7 @@ def generate_animation_task(
             negative_prompt=negative_prompt,
             cfg_scale=cfg_scale,
             special_fx=special_fx,
+            seamless_loop=seamless_loop,
         )
     )
 
@@ -181,6 +184,7 @@ async def _generate_animation_async(
     negative_prompt: str | None = None,
     cfg_scale: float | None = None,
     special_fx: str | None = None,
+    seamless_loop: bool = False,
 ) -> dict:
     """Async implementation of animation generation."""
     queue = get_queue_service()
@@ -265,7 +269,7 @@ async def _generate_animation_async(
                     "video_url": video_url,
                 })
 
-                # Queue video processing (ping-pong) and GIF conversion
+                # Queue video processing (ping-pong if enabled) and GIF conversion
                 from app.workers.video_worker import process_video_task
 
                 process_video_task.delay(
@@ -273,6 +277,7 @@ async def _generate_animation_async(
                     video_url=video_url,
                     user_id=user_id,
                     character_id=character_id,
+                    seamless_loop=seamless_loop,
                 )
 
         # Update job as completed

@@ -115,6 +115,10 @@ class AnimationGenerateRequest(BaseModel):
         description="Elements to avoid in generation (e.g., 'shadows, blur')",
         max_length=500,
     )
+    seamless_loop: bool = Field(
+        default=False,
+        description="Create seamless loop using ping-pong effect. Recommended when using multiple animations for smooth transitions between states.",
+    )
     cfg_scale: Optional[float] = Field(
         default=None,
         description="Classifier Free Guidance scale (typically 0.0-1.0)",
@@ -400,6 +404,7 @@ async def generate_animations(
             negative_prompt=request.negative_prompt,
             cfg_scale=request.cfg_scale,
             special_fx=request.special_fx,
+            seamless_loop=request.seamless_loop,
         )
 
         # Update generation with external job ID

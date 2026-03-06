@@ -351,6 +351,7 @@ async def create_animation_job(
     negative_prompt: str | None = None,
     cfg_scale: float | None = None,
     special_fx: str | None = None,
+    seamless_loop: bool = False,
 ) -> Job:
     """
     Create an animation generation job.
@@ -367,6 +368,7 @@ async def create_animation_job(
         negative_prompt: Elements to avoid in generation.
         cfg_scale: Classifier Free Guidance scale.
         special_fx: Special effects (hug, kiss, heart_gesture, squish, expansion).
+        seamless_loop: Whether to create a seamless loop using ping-pong effect.
 
     Returns:
         Created Job object.
@@ -413,6 +415,7 @@ async def create_animation_job(
         negative_prompt=negative_prompt,
         cfg_scale=cfg_scale,
         special_fx=special_fx,
+        seamless_loop=seamless_loop,
     )
 
     # Update job with Celery task ID

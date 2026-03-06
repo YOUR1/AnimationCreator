@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
+import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -57,6 +58,7 @@ export default function NewAnimationPage() {
   const [negativePrompt, setNegativePrompt] = useState('');
   const [cfgScale, setCfgScale] = useState([0.5]);
   const [specialFx, setSpecialFx] = useState<SpecialFx | 'none'>('none');
+  const [seamlessLoop, setSeamlessLoop] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -106,6 +108,7 @@ export default function NewAnimationPage() {
         negative_prompt: negativePrompt || undefined,
         cfg_scale: cfgScale[0],
         special_fx: specialFx !== 'none' ? specialFx : undefined,
+        seamless_loop: seamlessLoop,
       });
 
       await refreshCredits();
@@ -368,6 +371,22 @@ export default function NewAnimationPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="flex items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="seamless-loop">Seamless Loop</Label>
+                      <p className="text-xs text-muted-foreground">
+                        Creates a smooth ping-pong loop. Recommended when creating multiple
+                        animations (idle, walk, run) for seamless transitions between states.
+                      </p>
+                    </div>
+                    <Switch
+                      id="seamless-loop"
+                      checked={seamlessLoop}
+                      onCheckedChange={setSeamlessLoop}
+                      disabled={isGenerating}
+                    />
                   </div>
                 </CollapsibleContent>
               </Collapsible>
