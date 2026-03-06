@@ -116,7 +116,7 @@ class AnimationGenerateRequest(BaseModel):
         max_length=500,
     )
     seamless_loop: bool = Field(
-        default=False,
+        default=True,
         description="Create seamless loop using ping-pong effect. Recommended when using multiple animations for smooth transitions between states.",
     )
     cfg_scale: Optional[float] = Field(

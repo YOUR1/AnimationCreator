@@ -58,7 +58,7 @@ export default function NewAnimationPage() {
   const [negativePrompt, setNegativePrompt] = useState('');
   const [cfgScale, setCfgScale] = useState([0.5]);
   const [specialFx, setSpecialFx] = useState<SpecialFx | 'none'>('none');
-  const [seamlessLoop, setSeamlessLoop] = useState(false);
+  const [seamlessLoop, setSeamlessLoop] = useState(true);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
