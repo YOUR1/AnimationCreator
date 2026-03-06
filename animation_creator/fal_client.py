@@ -1,5 +1,6 @@
 """fal.ai API client wrapper."""
 
+import logging
 import os
 import time
 import fal_client
@@ -7,6 +8,8 @@ import requests
 from pathlib import Path
 
 from .config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class FalClient:
@@ -101,12 +104,15 @@ class FalClient:
         if special_fx:
             arguments["special_fx"] = special_fx
 
+        logger.info(f"Calling fal.ai Kling model with arguments: {arguments}")
+
         result = fal_client.subscribe(
             self.config.KLING_MODEL,
             arguments=arguments,
             with_logs=False,
         )
 
+        logger.info(f"fal.ai response video URL: {result['video']['url']}")
         return result["video"]["url"]
 
     @staticmethod
