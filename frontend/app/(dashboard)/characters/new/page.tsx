@@ -47,7 +47,7 @@ export default function NewCharacterPage() {
     setIsGenerating(true);
 
     try {
-      const generation = await api.createCharacter({
+      const response = await api.createCharacter({
         name,
         description: description || undefined,
         style,
@@ -57,8 +57,8 @@ export default function NewCharacterPage() {
       // Refresh credits after generation starts
       await refreshCredits();
 
-      // Redirect to generation status page or character page
-      router.push(`/characters?generation=${generation.id}`);
+      // Redirect to characters page with job ID for polling
+      router.push(`/characters?job=${response.job_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create character');
     } finally {

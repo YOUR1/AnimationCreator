@@ -98,7 +98,7 @@ export default function NewAnimationPage() {
     setIsGenerating(true);
 
     try {
-      const generation = await api.createAnimation({
+      const response = await api.createAnimation({
         character_id: characterId,
         type: animationType,
         name,
@@ -112,7 +112,7 @@ export default function NewAnimationPage() {
       });
 
       await refreshCredits();
-      router.push(`/animations?generation=${generation.id}`);
+      router.push(`/animations?job=${response.job_id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to create animation');
     } finally {

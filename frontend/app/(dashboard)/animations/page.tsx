@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useCallback } from 'react';
 import Link from 'next/link';
+import { useSearchParams, useRouter } from 'next/navigation';
 import api from '@/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -34,6 +35,10 @@ interface GroupedAnimations {
 }
 
 export default function AnimationsPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const jobId = searchParams.get('job');
+
   const [animations, setAnimations] = useState<Animation[]>([]);
   const [characters, setCharacters] = useState<Character[]>([]);
   const [pendingGenerations, setPendingGenerations] = useState<PendingGeneration[]>([]);
@@ -42,12 +47,9 @@ export default function AnimationsPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [previewAnimation, setPreviewAnimation] = useState<Animation | null>(null);
   const [cancellingId, setCancellingId] = useState<number | null>(null);
+  const [pollingJobId, setPollingJobId] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchData();
-  }, []);
-
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       const [animResponse, charResponse] = await Promise.all([
         api.getAnimations(1, 100),
@@ -61,7 +63,37 @@ export default function AnimationsPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Poll for job completion when job parameter is present
+  useEffect(() => {
+    if (!jobId) return;
+
+    setPollingJobId(jobId);
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const status = await api.getGenerationStatus(jobId);
+        if (status.generation.status === 'completed' || status.generation.status === 'failed') {
+          clearInterval(pollInterval);
+          setPollingJobId(null);
+          // Remove job param from URL and refresh data
+          router.replace('/animations');
+          fetchData();
+        }
+      } catch (error) {
+        console.error('Failed to poll job status:', error);
+        clearInterval(pollInterval);
+        setPollingJobId(null);
+      }
+    }, 2000);
+
+    return () => clearInterval(pollInterval);
+  }, [jobId, router, fetchData]);
 
   const fetchPendingGenerations = async () => {
     try {

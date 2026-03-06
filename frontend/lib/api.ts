@@ -12,6 +12,7 @@ import type {
   AnimationCreateRequest,
   Generation,
   GenerationStatusResponse,
+  GenerationStartResponse,
   Asset,
   CreditPack,
   CheckoutSession,
@@ -308,7 +309,7 @@ class ApiClient {
     return this.request<Character>(`/api/characters/${id}`);
   }
 
-  async createCharacter(data: CharacterCreateRequest): Promise<Generation> {
+  async createCharacter(data: CharacterCreateRequest): Promise<GenerationStartResponse> {
     // Map frontend style values to backend style values
     const styleMapping: Record<string, string> = {
       anime: 'kawaii',
@@ -323,7 +324,7 @@ class ApiClient {
       style: styleMapping[data.style] || data.style,
     };
 
-    return this.request<Generation>('/api/generate/character', {
+    return this.request<GenerationStartResponse>('/api/generate/character', {
       method: 'POST',
       body: JSON.stringify(mappedData),
     });
@@ -354,8 +355,8 @@ class ApiClient {
     return this.request<Animation>(`/api/animations/${id}`);
   }
 
-  async createAnimation(data: AnimationCreateRequest): Promise<Generation> {
-    return this.request<Generation>('/api/generate/animations', {
+  async createAnimation(data: AnimationCreateRequest): Promise<GenerationStartResponse> {
+    return this.request<GenerationStartResponse>('/api/generate/animations', {
       method: 'POST',
       body: JSON.stringify(data),
     });

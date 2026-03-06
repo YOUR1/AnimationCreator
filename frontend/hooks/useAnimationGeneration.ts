@@ -102,27 +102,25 @@ export function useAnimationGeneration(): UseAnimationGenerationReturn {
     setError(null);
 
     try {
-      const generation = await api.createAnimation({
+      const response = await api.createAnimation({
         character_id: params.characterId,
         type: params.type,
         name: params.name,
-        options: {
-          duration: params.duration,
-          custom_prompt: params.prompt,
-        },
+        duration: params.duration,
+        prompt: params.prompt,
       });
 
       const newJob: AnimationJobStatus = {
-        id: generation.id,
+        id: response.job_id,
         type: params.type,
         status: 'pending',
         progress: 0,
       };
 
       setJobs((prev) => [...prev, newJob]);
-      trackJob(generation.id, params.type);
+      trackJob(response.job_id, params.type);
 
-      return generation.id;
+      return response.job_id;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to start animation generation';
       setError(errorMessage);
@@ -142,26 +140,24 @@ export function useAnimationGeneration(): UseAnimationGenerationReturn {
         const type = types[i];
         const params = baseParams[i] || baseParams[0];
 
-        const generation = await api.createAnimation({
+        const response = await api.createAnimation({
           character_id: params.characterId,
           type,
           name: `${type} animation`,
-          options: {
-            duration: params.duration,
-            custom_prompt: params.prompt,
-          },
+          duration: params.duration,
+          prompt: params.prompt,
         });
 
         const newJob: AnimationJobStatus = {
-          id: generation.id,
+          id: response.job_id,
           type,
           status: 'pending',
           progress: 0,
         };
 
         setJobs((prev) => [...prev, newJob]);
-        trackJob(generation.id, type);
-        jobIds.push(generation.id);
+        trackJob(response.job_id, type);
+        jobIds.push(response.job_id);
       }
 
       return jobIds;

@@ -137,6 +137,13 @@ export interface GenerationStatusResponse {
   result?: Character | Animation;
 }
 
+// Response from creating a new generation job
+export interface GenerationStartResponse {
+  job_id: string;
+  message: string;
+  credits_used: number;
+}
+
 // Asset types
 export interface Asset {
   id: string;
