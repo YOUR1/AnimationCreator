@@ -138,7 +138,7 @@ class Settings(BaseSettings):
     sentry_dsn: str | None = None
 
     # Credits
-    default_credits_on_signup: int = 10
+    default_credits_on_signup: int = 0
 
     @property
     def async_database_url(self) -> str:
